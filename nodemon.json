@@ -1,0 +1,7 @@
+{
+    "env":{
+        "MONGO_USER":"dbUser",
+        "MONGO_PASSWORD": "dbUser",
+        "MONGO_DB" : "AlLForOne"
+    }
+}
