@@ -6,6 +6,7 @@ const {buildSchema} =  require('graphql');
 const mongoose = require('mongoose');
 const Event = require('./models/event');
 const User = require('./models/user');
+const Category = require('./models/category');
 const AppSchema = require('./GraphQl/schema/index');
 const bcrypt = require('bcryptjs');
 const jwet = require('jsonwebtoken')
@@ -30,17 +31,7 @@ app.use('/graphql', graphqlHttp({
 schema: AppSchema,
 
 rootValue :{
-    events: ()=> {
-        return Event.find()
-         .then(events => {
-             return events.map(event => {
-                 return{ ...event._doc}
-             })
-         })
-         .catch(err => {
-             throw err ;
-         })
-     },
+   
 
     users: ()=>{
             return User.find()
@@ -91,7 +82,16 @@ rootValue :{
     
          
      },
- 
+     categories : ()=>{
+        return Category.find()
+        .then(categories=> {
+            return categories.map(category => {
+                return{ ...category._doc}
+        })
+    }).catch(err=> {
+        throw err;
+    })
+     },
     creatEvent: args=> {
        const event = new Event({
         title: args.eventInput.title,
@@ -100,6 +100,23 @@ rootValue :{
         date: new Date(args.eventInput.date)
        })
        return  event 
+        .save()
+        .then(result => {
+            console.log(result);
+            return{ ...result._doc} 
+        })
+        .catch(err=> {
+            console.log(err);
+            throw err ;
+        } );
+        
+    },
+    creatCategory: args=> {
+       const category = new Category({
+        label: args.categoryInput.label,
+     
+       })
+       return  category 
         .save()
         .then(result => {
             console.log(result);
@@ -128,6 +145,18 @@ rootValue :{
          {expiresIn: '1h' }); 
 
          return {userId: user.id ,token: token, tokenExpiration :1 }
+    },
+    updateCategory: args=>{
+        console.log(args);
+       return  Category.findOneAndUpdate({_id:args._id},{label:args.categoryInput.label}, {new:true})
+    },
+    deleteCategory : args =>{
+        return Category.findOneAndRemove({_id:args._id})
+    },
+
+    getCategoryById: args=>{
+        console.log('getcat',args)
+        return Category.find({_id:args._id})
     }
 
    
@@ -140,7 +169,7 @@ graphiql: true,
     `mongodb+srv://${
         process.env.MONGO_USER}:${process.env.MONGO_PASSWORD
         }@allforone-nr1wz.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`
-        ,{ useUnifiedTopology: true ,useNewUrlParser: true}).then().catch(err=>{
+        ,{ useUnifiedTopology: true ,useNewUrlParser: true, useFindAndModify: false}).then().catch(err=>{
              console.log(err);   
         });
         

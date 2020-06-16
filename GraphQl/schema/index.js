@@ -2,6 +2,13 @@ const {buildSchema} = require('graphql');
 
 module.exports =  buildSchema(`
 
+type Category {
+    _id: ID!
+    label: String!
+}
+input CategoryInput {
+    label: String!
+}
     type User {
         _id: ID!
         firstname: String!,
@@ -52,10 +59,15 @@ module.exports =  buildSchema(`
         events:[Event!]!
         users:[User!]!
         login(email: String! ,password: String!): AuthData!
+        categories:[Category!]!
+        getCategoryById( _id: ID!):[Category]
     }
     type RootMutation{
         creatEvent(eventInput: EventInput): Event
         creatUser(userInput: UserInput): User
+        creatCategory(categoryInput:CategoryInput ):Category
+        updateCategory(_id:ID!, categoryInput:CategoryInput):Category
+        deleteCategory(_id:ID!):Category
     }
 
     schema {
